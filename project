@@ -1,0 +1,179 @@
+#include <Servo.h>
+#include <AFMotor.h>
+
+// Pin and motor speed definitions
+#define Echo A0
+#define Trig A1
+#define motor 10
+#define Speed 170
+#define spoint 103
+char value;
+int distance;
+int Left;
+int Right;
+int L = 0;
+int R = 0;
+
+Servo servo;
+AF_DCMotor M1(1);
+AF_DCMotor M2(2);
+AF_DCMotor M3(3);
+AF_DCMotor M4(4);
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(Trig, OUTPUT);
+  pinMode(Echo, INPUT);
+  servo.attach(motor);
+  M1.setSpeed(Speed);
+  M2.setSpeed(Speed);
+  M3.setSpeed(Speed);
+  M4.setSpeed(Speed);
+  servo.write(spoint);  // Set servo to default position
+}
+
+void loop() {
+  Obstacle();  // Call the obstacle avoidance function
+  // Uncomment the following lines if you want to use Bluetooth or voice control
+  // Bluetoothcontrol();
+  // voicecontrol();
+}
+
+void Bluetoothcontrol() {
+  if (Serial.available() > 0) {
+    value = Serial.read();
+    Serial.println(value);
+  }
+  if (value == 'F') {
+    forward();
+  } else if (value == 'B') {
+    backward();
+  } else if (value == 'L') {
+    left();
+  } else if (value == 'R') {
+    right();
+  } else if (value == 'S') {
+    Stop();
+  }
+}
+
+void Obstacle() {
+  distance = ultrasonic();
+  
+  if (distance <= 12) {  // If obstacle is closer than 12 cm
+    Stop();
+    delay(500);  // Pause for a short duration
+    backward();  // Move backward slightly
+    delay(300);
+    Stop();
+    L = leftsee();  // Check left
+    R = rightsee();  // Check right
+    
+    if (L > R) {  // Turn left if left is clearer
+      left();
+      delay(500);
+      Stop();
+    } else {  // Otherwise, turn right
+      right();
+      delay(500);
+      Stop();
+    }
+  } else {
+    forward();  // Move forward if no obstacle is detected
+  }
+}
+
+void voicecontrol() {
+  if (Serial.available() > 0) {
+    value = Serial.read();
+    Serial.println(value);
+    if (value == '^') {
+      forward();
+    } else if (value == '-') {
+      backward();
+    } else if (value == '<') {
+      L = leftsee();
+      if (L >= 10) {
+        left();
+        delay(500);
+        Stop();
+      } else {
+        Stop();
+      }
+    } else if (value == '>') {
+      R = rightsee();
+      if (R >= 10) {
+        right();
+        delay(500);
+        Stop();
+      } else {
+        Stop();
+      }
+    } else if (value == '*') {
+      Stop();
+    }
+  }
+}
+
+// Ultrasonic sensor distance reading function
+int ultrasonic() {
+  digitalWrite(Trig, LOW);
+  delayMicroseconds(4);
+  digitalWrite(Trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(Trig, LOW);
+  long t = pulseIn(Echo, HIGH);
+  long cm = t / 29 / 2;  // Convert time to distance
+  return cm;
+}
+
+// Robot movement functions
+void forward() {
+  M1.run(FORWARD);
+  M2.run(FORWARD);
+  M3.run(FORWARD);
+  M4.run(FORWARD);
+}
+
+void backward() {
+  M1.run(BACKWARD);
+  M2.run(BACKWARD);
+  M3.run(BACKWARD);
+  M4.run(BACKWARD);
+}
+
+void right() {
+  M1.run(BACKWARD);
+  M2.run(BACKWARD);
+  M3.run(FORWARD);
+  M4.run(FORWARD);
+}
+
+void left() {
+  M1.run(FORWARD);
+  M2.run(FORWARD);
+  M3.run(BACKWARD);
+  M4.run(BACKWARD);
+}
+
+void Stop() {
+  M1.run(RELEASE);
+  M2.run(RELEASE);
+  M3.run(RELEASE);
+  M4.run(RELEASE);
+}
+
+// Functions to check distances on the left and right
+int rightsee() {
+  servo.write(20);  // Move servo to the right
+  delay(800);
+  Right = ultrasonic();
+  return Right;
+}
+
+int leftsee() {
+  servo.write(180);  // Move servo to the left
+  delay(800);
+  Left = ultrasonic();
+  return Left;
+}
