@@ -1,0 +1,23 @@
+### 1. C++ (Primary Language)
+   - The entire code is written in C++ syntax.
+   - Used for defining logic, functions, and hardware control via libraries.
+
+### 2. Arduino Framework
+   - A subset of C++ specific to Arduino, including built-in functions like pinMode(), digitalWrite(), and Serial.print().
+   - Provides hardware abstraction for sensors, motors, and other peripherals.
+
+### 3. Libraries
+     - Servo Library (<Servo.h>)
+     - Used to control the servo motor for scanning.
+     - Adafruit Motor Shield Library (<AFMotor.h>)
+     - Manages DC motor controls through the Adafruit motor shield.
+   
+### 4. Serial Communication Protocol
+   - The Serial functions provide a means to send and receive data over a serial connection.
+   - This is a protocol rather than a language but is critical for Bluetooth and voice control functionalities.
+
+### 5. Embedded System Programming
+   - This involves directly interfacing with hardware (e.g., ultrasonic sensor) and controlling timing (delay(), pulseIn()).
+   - Part of embedded C/C++ principles.
+
+.
